@@ -121,3 +121,7 @@ Temporary Items
 # End of https://www.gitignore.io/api/c++,linux,macos,cmake,qtcreator
 
 CMakeLists.txt.user
+
+Sample_GL.frag
+Sample_GL.vert
+graphics_asgn1
