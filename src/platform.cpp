@@ -35,3 +35,16 @@ void Platform::draw(glm::mat4 VP) {
 void Platform::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
+
+// bool Platform::detect_collision(Player Player) {
+
+//     return std::fabs(this->position.y - Player.position.y + 0.09f) < (Player.headradius + this->height/2) && std::fabs(this->position.x - Player.position.x - 0.1f) < (Player.headradius + this->width/2);
+//     // 0.09f is an error term to stop the ball from continously bouncing
+
+// }
+
+// bounding_box_t Platform::bounding_box() {
+//     float x = this->position.x, y = this->position.y;
+//     bounding_box_t bbox = { x, y, this->width, this->height };
+//     return bbox;
+// }

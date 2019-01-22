@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "player.h"
 #include "platform.h"
+#include "objects.h"
 
 using namespace std;
 
@@ -15,6 +16,7 @@ GLFWwindow *window;
 
 Player barry;
 Platform platform;
+Coins monies;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 // float camera_rotation_angle = 0;
@@ -55,6 +57,7 @@ void draw() {
     // Scene render
     platform.draw(VP);
     barry.draw(VP);
+    monies.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -73,7 +76,14 @@ void tick_input(GLFWwindow *window) {
 }
 
 void tick_elements() {
-    // barry.gravity();
+    barry.gravity();
+
+    bounding_box_t a = monies.bounding_box();
+    bounding_box_t b = barry.bounding_box();
+    if (detect_collision(a, b)) {
+        monies.collected=true;
+        printf("boom");
+    }
     // camera_rotation_angle += 1;
 }
 
@@ -85,6 +95,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     barry       = Player(0, 0, COLOR_RED);
     platform    = Platform(-0.0f ,-0.0f ,18.0f, 4.0f, COLOR_GREEN);
+    monies      = Coins(1, 0, COLOR_YELLOW);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -126,11 +137,11 @@ int main(int argc, char **argv) {
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
-
             tick_elements();
             tick_input(window);
         }
-        printf("%f %f\n",barry.position.x, barry.position.y);
+        // printf("%f %f\n",barry.position.x, barry.position.y);
+        // printf("%f\n",barry.up);
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }

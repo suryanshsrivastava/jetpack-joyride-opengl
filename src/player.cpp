@@ -1,52 +1,63 @@
 #include "player.h"
 #include "main.h"
+#include "math.h"
+#include "timer.h"
 
 Player::Player(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
+    this->headradius = 0.1;
     this->rotation = 0;
     speed = 0.1;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
-    // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
-    static const GLfloat vertex_buffer_data[] = {
-        -1.0f,-1.0f,0.0f, // triangle 1 : begin
-        -1.0f,-1.0f,0.0f,
-        -1.0f, 1.0f,0.0f, // triangle 1 : end
-        1.0f, 1.0f,0.0f, // triangle 2 : begin
-        -1.0f,-1.0f,0.0f,
-        -1.0f, 1.0f,0.0f, // triangle 2 : end
-        // 1.0f,-1.0f, 1.0f,
-        // -1.0f,-1.0f,-1.0f,
-        // 1.0f,-1.0f,-1.0f,
-        // 1.0f, 1.0f,-1.0f,
-        // 1.0f,-1.0f,-1.0f,
-        // -1.0f,-1.0f,-1.0f,
-        // -1.0f,-1.0f,-1.0f,
-        // -1.0f, 1.0f, 1.0f,
-        // -1.0f, 1.0f,-1.0f,
-        // 1.0f,-1.0f, 1.0f,
-        // -1.0f,-1.0f, 1.0f,
-        // -1.0f,-1.0f,-1.0f,
-        // -1.0f, 1.0f, 1.0f,
-        // -1.0f,-1.0f, 1.0f,
-        // 1.0f,-1.0f, 1.0f,
-        // 1.0f, 1.0f, 1.0f,
-        // 1.0f,-1.0f,-1.0f,
-        // 1.0f, 1.0f,-1.0f,
-        // 1.0f,-1.0f,-1.0f,
-        // 1.0f, 1.0f, 1.0f,
-        // 1.0f,-1.0f, 1.0f,
-        // 1.0f, 1.0f, 1.0f,
-        // 1.0f, 1.0f,-1.0f,
-        // -1.0f, 1.0f,-1.0f,
-        // 1.0f, 1.0f, 1.0f,
-        // -1.0f, 1.0f,-1.0f,
-        // -1.0f, 1.0f, 1.0f,
-        // 1.0f, 1.0f, 1.0f,
-        // -1.0f, 1.0f, 1.0f,
-        // 1.0f,-1.0f, 1.0f
+    GLfloat vertex_buffer_data_head[900]; 
+    int sides = 100;
+    float angle = (2*M_PIl)/sides;
+
+    for(int i =0; i < sides;i++)
+    {
+        vertex_buffer_data_head[9*i] = 0.0f;
+        vertex_buffer_data_head[9*i + 1] = 0.0f;  
+        vertex_buffer_data_head[9*i + 2] = 0.0f;
+
+        vertex_buffer_data_head[9*i + 3] = headradius*cos(i*angle); 
+        vertex_buffer_data_head[9*i + 4] = headradius*sin(i*angle) ;
+        vertex_buffer_data_head[9*i + 5] = 0.0f; 
+        
+        vertex_buffer_data_head[9*i + 6] = headradius*cos((i+1)*angle); 
+        vertex_buffer_data_head[9*i + 7] = headradius*sin((i+1)*angle); 
+        vertex_buffer_data_head[9*i + 8] = 0.0f;
+    }
+
+    this->head = create3DObject(GL_TRIANGLES, 3*sides, vertex_buffer_data_head, color, GL_FILL);
+
+    static const GLfloat vertex_buffer_data_body[]={
+        0.1f, -0.1f, 0.0f,
+        -0.1f, -0.1f, 0.0f,
+        -0.1f, -0.3f, 0.0f,
+
+        0.1f, -0.3f, 0.0f,
+        -0.1f, -0.3f, 0.0f,
+        0.1f, -0.1f, 0.0f,
     };
 
-    this->object = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data, color, GL_FILL);
+    this->body = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data_body, color, GL_FILL); 
+
+    static const GLfloat vertex_buffer_data_legs[]={
+        0.0f, -0.3f, 0.0f,
+        -0.1f, -0.3f, 0.0f,
+        -0.05f, -0.5f, 0.0f,
+
+        0.0f, -0.3f, 0.0f,
+        0.1f, -0.3f, 0.0f,
+        0.05f, -0.5f, 0.0f,
+    };
+
+    this->legs = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data_legs, color, GL_FILL); 
+
+    // this->bounding_box.x = this->position.x; 
+    // this->bounding_box.y = this->position.y; 
+    // this->bounding_box.width = 0.2f; 
+    // this->bounding_box.height = 0.6f;
 }
 
 void Player::draw(glm::mat4 VP) {
@@ -58,17 +69,13 @@ void Player::draw(glm::mat4 VP) {
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    draw3DObject(this->object);
+    draw3DObject(this->head);
+    draw3DObject(this->body);
+    draw3DObject(this->legs);
 }
 
 void Player::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
-}
-
-void Player::tick() {
-    // this->rotation += speed;
-    // this->position.x -= speed;
-    // this->position.y -= speed;
 }
 
 void Player::tick_left() {
@@ -80,9 +87,21 @@ void Player::tick_right() {
 }
 
 void Player::tick_jump() {
-    this->position.y += speed;
+    this->up = 0.2;
+    this->position.y += up;
 }
 
 void Player::gravity() {
-    this->position.y -= speed;
+    if (this->position.y <= -1.5f) {
+        this->position.y = -1.5f;
+    }
+    else{
+        this->position.y += up;
+        this->up -= 0.0163f;
+    }
+}
+
+bounding_box_t Player::bounding_box() {
+    bounding_box_t bbox = { this->position.x, this->position.y, 0.2f, 0.6f };
+    return bbox;
 }
