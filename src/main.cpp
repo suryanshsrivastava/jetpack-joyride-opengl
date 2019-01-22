@@ -1,6 +1,7 @@
 #include "main.h"
 #include "timer.h"
-#include "ball.h"
+#include "player.h"
+#include "platform.h"
 
 using namespace std;
 
@@ -12,10 +13,11 @@ GLFWwindow *window;
 * Customizable functions *
 **************************/
 
-Ball ball1;
+Player barry;
+Platform platform;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
-float camera_rotation_angle = 0;
+// float camera_rotation_angle = 0;
 
 Timer t60(1.0 / 60);
 
@@ -30,7 +32,7 @@ void draw() {
     glUseProgram (programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+    glm::vec3 eye (0,0,1);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target (0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -51,20 +53,28 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    ball1.draw(VP);
+    platform.draw(VP);
+    barry.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
+    int up = glfwGetKey(window, GLFW_KEY_UP);
     if (left) {
-        // Do something
+        barry.tick_left();
+    }
+    if (right) {
+        barry.tick_right();
+    }
+    if (up) {
+        barry.tick_jump();  
     }
 }
 
 void tick_elements() {
-    ball1.tick();
-    camera_rotation_angle += 1;
+    // barry.gravity();
+    // camera_rotation_angle += 1;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -73,8 +83,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1       = Ball(0, 0, COLOR_RED);
-
+    barry       = Player(0, 0, COLOR_RED);
+    platform    = Platform(-0.0f ,-0.0f ,18.0f, 4.0f, COLOR_GREEN);
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -120,7 +130,7 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
         }
-
+        printf("%f %f\n",barry.position.x, barry.position.y);
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }
