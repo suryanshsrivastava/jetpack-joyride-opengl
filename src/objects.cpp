@@ -26,11 +26,6 @@ Coins::Coins(float x, float y, color_t color) {
     }
 
     this->object = create3DObject(GL_TRIANGLES, 3*sides, vertex_buffer_data_head, color, GL_FILL);
-    
-    // this->bounding_box.x = this->position.x; 
-    // this->bounding_box.y = this->position.y; 
-    // this->bounding_box.width = 0.2f; 
-    // this->bounding_box.height = 0.2f; 
 }
 
 void Coins::draw(glm::mat4 VP) {
@@ -55,7 +50,3 @@ bounding_box_t Coins::bounding_box() {
     bounding_box_t bbox = { this->position.x, this->position.y, 0.2f, 0.2f };
     return bbox;
 }
-// bool Coins::detect_collision(Player player,) {
-//     return std::fabs(this->position.x - ball.position.x) < (ball.radius + 0.7f) && std::fabs(this->position.y - ball.position.y) < (ball.radius);
-// }
-

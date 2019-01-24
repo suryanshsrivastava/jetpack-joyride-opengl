@@ -53,11 +53,6 @@ Player::Player(float x, float y, color_t color) {
     };
 
     this->legs = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data_legs, color, GL_FILL); 
-
-    // this->bounding_box.x = this->position.x; 
-    // this->bounding_box.y = this->position.y; 
-    // this->bounding_box.width = 0.2f; 
-    // this->bounding_box.height = 0.6f;
 }
 
 void Player::draw(glm::mat4 VP) {

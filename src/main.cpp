@@ -16,7 +16,7 @@ GLFWwindow *window;
 
 Player barry;
 Platform platform;
-Coins monies;
+vector<Coins> monies;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 // float camera_rotation_angle = 0;
@@ -34,9 +34,9 @@ void draw() {
     glUseProgram (programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye (0,0,1);
+    glm::vec3 eye (screen_center_x,screen_center_y,1);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    glm::vec3 target (0, 0, 0);
+    glm::vec3 target (screen_center_x, screen_center_y, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
 
@@ -57,7 +57,9 @@ void draw() {
     // Scene render
     platform.draw(VP);
     barry.draw(VP);
-    monies.draw(VP);
+    for(int i=0; i<monies.size(); i++) {
+        monies[i].draw(VP);
+    }
 }
 
 void tick_input(GLFWwindow *window) {
@@ -77,12 +79,18 @@ void tick_input(GLFWwindow *window) {
 
 void tick_elements() {
     barry.gravity();
-
-    bounding_box_t a = monies.bounding_box();
-    bounding_box_t b = barry.bounding_box();
-    if (detect_collision(a, b)) {
-        monies.collected=true;
+    //Coin Collection
+    for(int i=0; i<monies.size(); i++) {
+        if (detect_collision(monies[i].bounding_box(), barry.bounding_box())) {
+        monies[i].collected=true;
         printf("boom");
+        }
+    }
+    //Panning
+    if(barry.position.x > screen_center_x+4 || barry.position.x < screen_center_x-4) {
+       screen_center_x = barry.position.x;
+       printf("%i\n", screen_center_x);
+       platform.set_position(barry.position.x, 0.0f); 
     }
     // camera_rotation_angle += 1;
 }
@@ -93,9 +101,19 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    barry       = Player(0, 0, COLOR_RED);
-    platform    = Platform(-0.0f ,-0.0f ,18.0f, 4.0f, COLOR_GREEN);
-    monies      = Coins(1, 0, COLOR_YELLOW);
+    barry   = Player(0, 0, COLOR_RED);
+
+    platform    = Platform(0.0f ,0.0f ,18.0f, 4.0f, COLOR_GREEN);
+
+    for(int i=1; i<1000; i++){
+        if(rand()%2){
+        monies.push_back(Coins(rand()%1000, rand()%4, COLOR_YELLOW));
+        }
+        else{
+        monies.push_back(Coins(rand()%1000, rand()%4, COLOR_ORANGE));
+        }
+    }
+    
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
@@ -120,8 +138,8 @@ void initGL(GLFWwindow *window, int width, int height) {
 
 int main(int argc, char **argv) {
     srand(time(0));
-    int width  = 600;
-    int height = 600;
+    int width  = 800;
+    int height = 800;
 
     window = initGLFW(width, height);
 
