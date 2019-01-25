@@ -3,6 +3,7 @@
 #include "player.h"
 #include "platform.h"
 #include "objects.h"
+#include "enemies.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ GLFWwindow *window;
 Player barry;
 Platform platform;
 vector<Coins> monies;
+vector<FireLine> enemies1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 // float camera_rotation_angle = 0;
@@ -60,6 +62,9 @@ void draw() {
     for(int i=0; i<monies.size(); i++) {
         monies[i].draw(VP);
     }
+    for(int i=0; i<enemies1.size(); i++) {
+        enemies1[i].draw(VP);
+    }
 }
 
 void tick_input(GLFWwindow *window) {
@@ -86,6 +91,7 @@ void tick_elements() {
         printf("boom");
         }
     }
+
     //Panning
     if(barry.position.x > screen_center_x+4 || barry.position.x < screen_center_x-4) {
        screen_center_x = barry.position.x;
@@ -105,14 +111,18 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     platform    = Platform(0.0f ,0.0f ,18.0f, 4.0f, COLOR_GREEN);
 
-    for(int i=1; i<1000; i++){
+    for(int i=0; i<1000; i++){
         if(rand()%2){
-        monies.push_back(Coins(rand()%1000, rand()%4, COLOR_YELLOW));
+        monies.push_back(Coins(rand()%1000, rand()%5 - 1, COLOR_YELLOW));
         }
         else{
-        monies.push_back(Coins(rand()%1000, rand()%4, COLOR_ORANGE));
+        monies.push_back(Coins(rand()%1000, rand()%5 - 1, COLOR_ORANGE));
         }
     }
+
+    for(int i=0; i<1000; i++) {
+        enemies1.push_back(FireLine(rand()%1000, rand()%5 - 1, 2*M_PIl/rand() ,COLOR_RED));
+    }    
     
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -158,8 +168,6 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
         }
-        // printf("%f %f\n",barry.position.x, barry.position.y);
-        // printf("%f\n",barry.up);
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }
