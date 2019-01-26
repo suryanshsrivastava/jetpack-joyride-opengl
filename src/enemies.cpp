@@ -67,14 +67,17 @@ void FireLine::draw(glm::mat4 VP) {
     draw3DObject(this->cylindrical);
 }
 
-void FireLine::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
-}
-
 bool FireLine::detect_collision(Player Player) {
     return (std::sqrt(std::pow(Player.position.x - this->position.x, 2) + std::pow(Player.position.y - this->position.y, 2)*1.0)
     +      std::sqrt(std::pow(Player.position.x - this->position.x - length*cos(this->rotation* M_PI / 180.0f), 2) + 
            std::pow(Player.position.y - this->position.y -length*sin(this->rotation* M_PI / 180.0f), 2)*1.0))
+    - length < 0.1; 
+}
+
+bool FireLine::extinguish(Balloons Balloons) {
+    return (std::sqrt(std::pow(Balloons.position.x - this->position.x, 2) + std::pow(Balloons.position.y - this->position.y, 2)*1.0)
+    +      std::sqrt(std::pow(Balloons.position.x - this->position.x - length*cos(this->rotation* M_PI / 180.0f), 2) + 
+           std::pow(Balloons.position.y - this->position.y -length*sin(this->rotation* M_PI / 180.0f), 2)*1.0))
     - length < 0.1; 
 }
 
@@ -203,5 +206,103 @@ void FireBeam::movement() {
 bounding_box_t FireBeam::bounding_box() {
     float x = this->position.x + 1.5f, y = this->position.y-0.25f;
     bounding_box_t bbox = { x, y, 3.3f, 0.6f };
+    return bbox;
+}
+
+Boomerang::Boomerang(float x, float y, color_t color) {
+    this->position = glm::vec3(x, y, 0);
+    this->rotation = 0;
+    this->back=true;
+    this->speed_x=-0.15f;
+    this->speed_y=0.05f;
+    this->rotation_speed=5;
+    this->spawn=true;
+    // printf("yay\n");
+
+    static const GLfloat vertex_buffer_data[]={
+        -0.25f, 0.0f, 0.0f,
+        -0.5f, 0.0f, 0.0f,
+        0.0f, 0.75f, 0.0f,
+
+        -0.25f, 0.0f, 0.0f,
+        -0.5f, 0.0f, 0.0f,
+        0.0f, -0.75f, 0.0f,
+    };
+
+    this->boomerang = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color, GL_FILL); 
+}
+
+void Boomerang::draw(glm::mat4 VP) {
+    Matrices.model = glm::mat4(1.0f);
+    glm::mat4 translate = glm::translate (this->position);    // glTranslatef
+    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    rotate          = glm::translate(glm::vec3(0, 0, 0)) * rotate * glm::translate(glm::vec3(0, 0, 0));
+    Matrices.model *= (translate * rotate);
+    glm::mat4 MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->boomerang);
+}
+
+void Boomerang::movement() {
+    this->rotation+=this->rotation_speed;
+    this->position.y-=this->speed_y;
+    this->position.x+=this->speed_x;
+    this->speed_x+=0.00163f;
+}
+
+void Boomerang::set_position(float x, float y) {
+    this->position = glm::vec3(x, y, 0);
+}
+
+bounding_box_t Boomerang::bounding_box() {
+    float x = this->position.x -0.25f, y = this->position.y;
+    bounding_box_t bbox = { x, y, 1.0f, 1.0f };
+    return bbox;
+}
+
+Viserion::Viserion(float x, float y, color_t color) {
+    this->position = glm::vec3(x, y, 0);
+    this->rotation = 0;
+    this->health = 50;
+    this->spawn=true;
+
+    static const GLfloat vertex_buffer_data[]={
+        -0.25f, 0.0f, 0.0f,
+        -0.5f, 0.0f, 0.0f,
+        0.0f, 0.75f, 0.0f,
+
+        -0.25f, 0.0f, 0.0f,
+        -0.5f, 0.0f, 0.0f,
+        0.0f, -0.75f, 0.0f,
+    };
+
+    this->dragon = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color, GL_FILL); 
+}
+
+void Viserion::draw(glm::mat4 VP) {
+    Matrices.model = glm::mat4(1.0f);
+    glm::mat4 translate = glm::translate (this->position);    // glTranslatef
+    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    rotate          = glm::translate(glm::vec3(0, 0, 0)) * rotate * glm::translate(glm::vec3(0, 0, 0));
+    Matrices.model *= (translate * rotate);
+    glm::mat4 MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->dragon);
+}
+
+void Viserion::movement(Player Player) {
+    // this->rotation+=this->rotation_speed;
+    this->position.y=Player.position.y;
+    this->position.x=screen_center_x+3;
+    // this->speed_x+=0.00163f;
+}
+
+void Viserion::set_position(float x, float y) {
+    this->position = glm::vec3(x, y, 0);
+}
+
+bounding_box_t Viserion::bounding_box() {
+    float x = this->position.x -0.25f, y = this->position.y;
+    bounding_box_t bbox = { x, y, 1.0f, 1.0f };
     return bbox;
 }
