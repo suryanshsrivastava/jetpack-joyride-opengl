@@ -65,6 +65,7 @@ void draw() {
     for(int i=0; i<enemies1.size(); i++) {
         enemies1[i].draw(VP);
     }
+    enemies1[0].set_position(0,0);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -83,14 +84,28 @@ void tick_input(GLFWwindow *window) {
 }
 
 void tick_elements() {
+    //Gravity
     barry.gravity();
+
     //Coin Collection
     for(int i=0; i<monies.size(); i++) {
         if (detect_collision(monies[i].bounding_box(), barry.bounding_box())) {
-        monies[i].collected=true;
-        printf("boom");
+        monies.erase(monies.begin()+i);
+        // monies[i].collected=true;
+        printf("ka ching\n");
         }
     }
+
+    // Collision detection with enemies
+    for(int i=0; i<enemies1.size(); i++) {
+        if (enemies1[i].detect_collision(barry)) {
+        barry.set_position(screen_center_x-4,0);
+        }
+    }
+
+    // if (enemies1[0].detect_collision(barry)) {
+    //     barry.set_position(screen_center_x-4,0);
+    // }
 
     //Panning
     if(barry.position.x > screen_center_x+4 || barry.position.x < screen_center_x-4) {
@@ -120,8 +135,8 @@ void initGL(GLFWwindow *window, int width, int height) {
         }
     }
 
-    for(int i=0; i<1000; i++) {
-        enemies1.push_back(FireLine(rand()%1000, rand()%5 - 1, 2*M_PIl/rand() ,COLOR_RED));
+    for(int i=0; i<500; i++) {
+        enemies1.push_back(FireLine(rand()%1000, rand()%5 - 1, 0 ,COLOR_RED));
     }    
     
     // Create and compile our GLSL program from the shaders

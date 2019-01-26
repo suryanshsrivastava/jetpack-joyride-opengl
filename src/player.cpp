@@ -82,17 +82,24 @@ void Player::tick_right() {
 }
 
 void Player::tick_jump() {
-    this->up = 0.2;
+    this->up = 0.02;
     this->position.y += up;
 }
 
 void Player::gravity() {
-    if (this->position.y <= -1.5f) {
-        this->position.y = -1.5f;
+    if(this->position.y <= 4){
+        if (this->position.y <= -1.5f) {
+            this->position.y = -1.5f;
+        }
+        else{
+            this->position.y += up;
+            this->up -= 0.00163f;
+        }
     }
-    else{
-        this->position.y += up;
-        this->up -= 0.0163f;
+    else
+    {
+        set_position(this->position.x, this->position.y-0.11f);
+        this->up = 0;
     }
 }
 

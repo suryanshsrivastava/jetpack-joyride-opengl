@@ -5,7 +5,7 @@ Coins::Coins(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
     this->radius=0.1;
-    this->collected=false;
+    // this->collected=false;
     GLfloat vertex_buffer_data_head[900]; 
     int sides = 100;
     float angle = (2*M_PIl)/sides;
@@ -36,10 +36,7 @@ void Coins::draw(glm::mat4 VP) {
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-    if(!this->collected){
-        draw3DObject(this->object);
-    }
+    draw3DObject(this->object);
 }
 
 void Coins::set_position(float x, float y) {
