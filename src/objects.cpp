@@ -50,32 +50,38 @@ bounding_box_t Coins::bounding_box() {
 
 Magnet::Magnet(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
-    this->rotation = 90;
+    this->rotation = 0;
     
-    GLfloat vertex_buffer_data[45] ={ 
-        0.9f, 0.0f, 0.0f,
-        0.9f, 1.1f, 0.0f,
-        0.7f, 1.0f, 0.0f,
+    static const GLfloat vertex_buffer_data_vertical[]={
+        0.0f, 0.6f, 0.0f,
+        0.0f, -0.6f, 0.0f,
+        0.2f, -0.6f, 0.0f,
 
-        0.9f, 0.0f, 0.0f,
-        0.7f, 1.1f, 0.0f,
-        0.7f, 0.0f, 0.0f,
+        0.0f, 0.6f, 0.0f,
+        0.2f, 0.6f, 0.0f,
+        0.2f, -0.6f, 0.0f,   
+    };
 
-        0.7f, 1.0f, 0.0f,
-       -0.7f, 1.0f, 0.0f,
-        0.0f, 2.0f, 0.0f,
+    this->handle = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data_vertical, color, GL_FILL);
 
-       -0.7f, 0.0f, 0.0f,
-       -0.9f, 1.1f, 0.0f,
-       -0.7f, 1.0f, 0.0f,
+    static const GLfloat vertex_buffer_data_horiontal[]={
+        0.2f, 0.6f, 0.0f,
+        0.6f, 0.6f, 0.0f,
+        0.6f, 0.3f, 0.0f,
 
-       -0.7f, 0.0f, 0.0f,
-       -0.9f, 1.1f, 0.0f,
-       -0.9f, 0.0f, 0.0f
+        0.2f, 0.6f, 0.0f,
+        0.2f, 0.3f, 0.0f,
+        0.6f, 0.3f, 0.0f,
 
-    }; 
+        0.2f, -0.6f, 0.0f,
+        0.6f, -0.6f, 0.0f,
+        0.6f, -0.3f, 0.0f,
 
-    this->object = create3DObject(GL_TRIANGLES, 15, vertex_buffer_data, color, GL_FILL);
+        0.2f, -0.6f, 0.0f,
+        0.2f, -0.3f, 0.0f,
+        0.6f, -0.3f, 0.0f,
+    };
+    this->poles = create3DObject(GL_TRIANGLES, 12, vertex_buffer_data_horiontal, COLOR_BLACK, GL_FILL);
 }
 
 void Magnet::draw(glm::mat4 VP) {
@@ -86,19 +92,16 @@ void Magnet::draw(glm::mat4 VP) {
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    draw3DObject(this->object);
+    draw3DObject(this->handle);
+    draw3DObject(this->poles);
 }
 
-void Magnet::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
-}
+// void Magnet::set_position(float x, float y) {
+//     this->position = glm::vec3(x, y, 0);
+// }
 
-void Magnet::set_rotation(float rotation) {
-    this->rotation = rotation;
-}
-
-// bool Magnet::detect_collision(Ball ball) {
-//     return std::fabs(this->position.y - ball.position.y) < (ball.radius + 0.7f);
+// void Magnet::set_rotation(float rotation) {
+//     this->rotation = rotation;
 // }
 
 bounding_box_t Magnet::bounding_box() {

@@ -19,6 +19,8 @@ Player barry;
 Platform platform;
 vector<Coins> monies;
 vector<FireLine> enemies1;
+vector<FireBeam> enemies2;
+vector<Magnet> magnets;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 // float camera_rotation_angle = 0;
@@ -65,7 +67,10 @@ void draw() {
     for(int i=0; i<enemies1.size(); i++) {
         enemies1[i].draw(VP);
     }
-    enemies1[0].set_position(0,0);
+    for(int i=0; i<enemies2.size(); i++) {
+        enemies2[i].draw(VP);
+    }
+    magnets[0].draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -91,21 +96,26 @@ void tick_elements() {
     for(int i=0; i<monies.size(); i++) {
         if (detect_collision(monies[i].bounding_box(), barry.bounding_box())) {
         monies.erase(monies.begin()+i);
-        // monies[i].collected=true;
-        printf("ka ching\n");
         }
     }
 
-    // Collision detection with enemies
+    // Collision detection with Fireline
     for(int i=0; i<enemies1.size(); i++) {
         if (enemies1[i].detect_collision(barry)) {
         barry.set_position(screen_center_x-4,0);
         }
     }
 
-    // if (enemies1[0].detect_collision(barry)) {
-    //     barry.set_position(screen_center_x-4,0);
-    // }
+    // Collision detection with FireBeam
+    for(int i=0; i<enemies2.size(); i++) {
+        if (detect_collision(enemies2[i].bounding_box(), barry.bounding_box())) {
+        barry.set_position(screen_center_x-4,0);
+        }
+    }
+
+    //Movement of Firebeams
+    for(int i=0; i<enemies2.size(); i++)
+        enemies2[i].movement(); 
 
     //Panning
     if(barry.position.x > screen_center_x+4 || barry.position.x < screen_center_x-4) {
@@ -135,10 +145,15 @@ void initGL(GLFWwindow *window, int width, int height) {
         }
     }
 
-    for(int i=0; i<500; i++) {
+    for(int i=0; i<250; i++) {
         enemies1.push_back(FireLine(rand()%1000, rand()%5 - 1, 0 ,COLOR_RED));
+    }
+
+    for(int i=0; i<250; i++) {
+        enemies2.push_back(FireBeam(rand()%1000, rand()%5 - 1, COLOR_NEONPINK));
     }    
     
+    magnets.push_back(Magnet(0,0,COLOR_RED));
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform

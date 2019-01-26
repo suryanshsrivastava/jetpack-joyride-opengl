@@ -24,13 +24,17 @@ private:
 class FireBeam {
 public:
     FireBeam() {}
-    FireBeam(float x, float y, double angle, color_t color);
+    FireBeam(float x, float y, color_t color);
     glm::vec3 position;
     float radius;
     float length;
+    float seperation;
     float rotation;
+    float speed;
+    bool moveup;
     void draw(glm::mat4 VP);
-    void set_position(float x, float y);
+    void movement();
+    // void set_position(float x, float y);
     bool detect_collision(Player Player);
     bounding_box_t bounding_box();
 private:

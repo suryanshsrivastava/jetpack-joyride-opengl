@@ -30,7 +30,8 @@ public:
     // bool detect_collision(Ball ball);
     bounding_box_t bounding_box();
 private:
-    VAO *object;    // How an object looks 
+    VAO *handle;    // How an object looks
+    VAO *poles; 
 };
 
 #endif
